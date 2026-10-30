@@ -5,421 +5,257 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPSC Voice Scorer (Minor)</title>
     <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --accent-color: #ff6f00;
-            --accent-hover: #ffa000;
-            --text-color: #ffffff;
-            --text-secondary: #b0b0b0;
-            --danger-color: #d32f2f;
-            --success-color: #388e3c;
-            --border-color: #333333;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 16px;
-            max-width: 600px;
-            margin: 0 auto;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        header h1 {
-            font-size: 1.5rem;
-            color: var(--accent-color);
-            letter-spacing: 1px;
-        }
-
+        h1 { font-size: 1.5rem; text-align: center; color: #ffcc00; margin-bottom: 10px; }
         .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        .status-badge {
-            display: inline-block;
-            background: #333;
-            color: var(--text-secondary);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-bottom: 12px;
-        }
-
-        .instructions {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        .mic-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .mic-btn {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            font-size: 2rem;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(255, 111, 0, 0.4);
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mic-btn.listening {
-            background-color: var(--danger-color);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(211, 47, 47, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
-        }
-
-        .transcript-box {
-            background: #111;
-            border: 1px dashed var(--border-color);
-            padding: 12px;
+            background: #1e1e1e;
+            border: 1px solid #333;
             border-radius: 8px;
-            min-height: 50px;
-            font-size: 0.95rem;
-            color: #ddd;
-            margin-top: 10px;
-            word-break: break-all;
+            padding: 15px;
+            margin-bottom: 15px;
         }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .result-item {
-            background: #252525;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-
-        .result-item .label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .result-item .value {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        .hf-display {
-            background: linear-gradient(135deg, #2c1a00, #1e1e1e);
-            border: 2px solid var(--accent-color);
-            text-align: center;
-            padding: 24px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-
-        .hf-display .label {
-            font-size: 0.9rem;
-            color: var(--accent-color);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-
-        .hf-display .value {
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #fff;
-        }
-
-        .btn {
-            background-color: #333;
-            color: white;
+        button {
+            background-color: #ffcc00;
+            color: #000;
             border: none;
             padding: 12px 20px;
-            border-radius: 8px;
             font-size: 1rem;
-            cursor: pointer;
-            width: 100%;
             font-weight: bold;
-            transition: background 0.2s;
-        }
-
-        .btn:active {
-            background-color: #444;
-        }
-
-        .btn-reset {
-            background-color: #424242;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
             margin-top: 10px;
         }
+        button:active { background-color: #e6b800; }
+        button.secondary { background-color: #333; color: #fff; }
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+            margin-top: 5px;
+        }
+        .status {
+            font-size: 0.9rem;
+            color: #00ffcc;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .flex { display: flex; gap: 10px; }
+        .flex > * { flex: 1; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: center; }
+        th { background: #2a2a2a; color: #ffcc00; }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>IPSC Voice Scorer (Minor)</h1>
-    </header>
-
-    <div class="card">
-        <div class="status-badge">手動トグル音声入力モード</div>
-        <p class="instructions">
-            1. <strong>🎤ボタンを押して録音を開始</strong>します。<br>
-            2. 「タイム、5秒23、アルファ2つ、チャーリー1つ...」と一気に話します。<br>
-            3. 話し終えたら、<strong>もう一度🎤ボタンを押して停止</strong>すると計算されます。
-        </p>
-
-        <div class="mic-container">
-            <button id="micBtn" class="mic-btn" onclick="toggleListening()">🎤</button>
-            <div id="statusText" style="margin-top: 8px; font-size: 0.85rem; color: var(--text-secondary);">タップして録音開始</div>
-        </div>
-
-        <div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">音声認識テキスト:</div>
-            <div id="transcriptBox" class="transcript-box">（ここに認識された音声が表示されます）</div>
-        </div>
+    <h1>IPSC Voice Scorer (Minor)</h1>
+    
+    <!-- ステップ 1: タイム入力 -->
+    <div id="step1" class="card">
+        <h3>Step 1: タイム入力</h3>
+        <label>タイム (秒):</label>
+        <input type="number" id="timeInput" step="0.01" placeholder="例: 3.52">
+        <button onclick="nextStep(2)">次へ (ターゲット入力へ)</button>
     </div>
 
-    <!-- 結果表示エリア -->
-    <div class="card">
-        <div class="results-grid">
-            <div class="result-item">
-                <div class="label">タイム</div>
-                <div class="value" id="valTime">0.00 s</div>
-            </div>
-            <div class="result-item">
-                <div class="label">合計ポイント</div>
-                <div class="value" id="valPoints">0 pts</div>
-            </div>
-            <div class="result-item">
-                <div class="label">ペナルティ</div>
-                <div class="value" id="valPenalties" style="color: var(--danger-color);">-0 pts</div>
-            </div>
-            <div class="result-item">
-                <div class="label">ネットスコア</div>
-                <div class="value" id="valNetScore">0 pts</div>
-            </div>
+    <!-- ステップ 2: ターゲット入力 -->
+    <div id="step2" class="card" style="display:none;">
+        <h3>Step 2: ターゲット確認・音声入力</h3>
+        <p style="font-size:0.82rem; color:#aaa;">「アルファ」「チャーリー」「デルタ」「ミス」「ノーシュート」「プロシージャー」と発話してください。</p>
+        
+        <div class="flex">
+            <button id="micBtn" onclick="toggleVoice()">🎙️ 音声認識: 停止中</button>
+            <button class="secondary" onclick="resetScores()">リセット</button>
         </div>
+        <div id="voiceStatus" class="status">マイクボタンを押して開始</div>
 
-        <!-- ターゲット内訳 -->
-        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; background: #151515; padding: 10px; border-radius: 6px;">
-            <strong>内訳:</strong> A: <span id="countA">0</span> | C: <span id="countC">0</span> | D: <span id="countD">0</span> | Miss: <span id="countMiss">0</span> | NS: <span id="countNS">0</span> | Proc: <span id="countProc">0</span>
+        <table>
+            <tr><th>判定</th><th>点数/ペナルティ</th><th>回数</th></tr>
+            <tr><td>A (Alpha)</td><td>5点</td><td id="countA">0</td></tr>
+            <tr><td>C (Charlie)</td><td>3点</td><td id="countC">0</td></tr>
+            <tr><td>D (Delta)</td><td>1点</td><td id="countD">0</td></tr>
+            <tr><td>Miss</td><td>-10点</td><td id="countMiss">0</td></tr>
+            <tr><td>No Shoot</td><td>-10点</td><td id="countNS">0</td></tr>
+            <tr><td>Proc.</td><td>-10点</td><td id="countProc">0</td></tr>
+        </table>
+
+        <button style="margin-top:15px;" onclick="nextStep(3)">結果（ヒットファクター）を見る</button>
+        <button class="secondary" onclick="nextStep(1)">戻る</button>
+    </div>
+
+    <!-- ステップ 3: 結果表示 -->
+    <div id="step3" class="card" style="display:none;">
+        <h3>Step 3: ヒットファクター算出</h3>
+        <div style="font-size: 1.1rem; margin-bottom: 10px; line-height: 1.6;">
+            <p>タイム: <span id="resTime">0.00</span> 秒</p>
+            <p>合計ポイント: <span id="resPoints">0</span> 点</p>
+            <p style="font-size: 1.4rem; color: #00ffcc; font-weight: bold;">HF: <span id="resHF">0.0000</span></p>
         </div>
-
-        <div class="hf-display">
-            <div class="label">Hit Factor (HF)</div>
-            <div class="value" id="valHitFactor">0.0000</div>
-        </div>
-
-        <button class="btn btn-reset" onclick="resetAll()">リセット</button>
+        <button onclick="nextStep(2)">修正する</button>
+        <button class="secondary" onclick="resetAll()">最初からやり直す</button>
     </div>
 
     <script>
-        let isListening = false;
-        let recognition = null;
-        let finalTranscript = '';
+        let currentStep = 1;
+        let scores = { A: 0, C: 0, D: 0, Miss: 0, NS: 0, Proc: 0 };
+        let runTime = 0.0;
 
-        function initSpeechRecognition() {
+        let recognition = null;
+        let isListening = false;
+        let shouldListen = false; // 自動再スタート制御フラグ
+
+        function initSpeech() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("このブラウザは音声認識をサポートしていません。Google Chromeを使用してください。");
-                return false;
+                alert("お使いのブラウザは音声認識に対応していません。Google Chromeをご利用ください。");
+                return;
             }
-
             recognition = new SpeechRecognition();
             recognition.lang = 'ja-JP';
-            recognition.interimResults = true; // 途中経過を表示するためtrueにする
-            recognition.continuous = true;     // 手動で止めるまで継続
-
-            recognition.onstart = () => {
-                isListening = true;
-                finalTranscript = '';
-                document.getElementById('micBtn').classList.add('listening');
-                document.getElementById('statusText').innerText = "録音中... 話し終わったらもう一度ボタンを押してください";
-            };
+            recognition.interimResults = false;
+            recognition.continuous = true;
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
-                }
-                // リアルタイムで認識テキストを表示ボックスに反映
-                const displayCurrent = finalTranscript + interimTranscript;
-                document.getElementById('transcriptBox').innerText = displayCurrent || "（音声を聴き取っています...）";
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                document.getElementById('voiceStatus').innerText = `認識: 「${transcript}」`;
+                parseVoiceCommand(transcript);
             };
 
             recognition.onerror = (event) => {
-                console.error("Speech recognition error", event.error);
-                if (event.error !== 'aborted') {
-                    document.getElementById('statusText').innerText = "エラー: " + event.error;
-                }
+                console.log("Speech recognition error", event.error);
             };
 
             recognition.onend = () => {
-                // 手動または自動で終了したとき
-                stopListeningUI();
-                if (finalTranscript.trim() !== '') {
-                    parseAndCalculate(finalTranscript);
+                // ユーザーが明動的に停止していない場合、自動的に音声認識を再起動する
+                if (shouldListen) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.log("Restart error:", e);
+                    }
+                } else {
+                    isListening = false;
+                    updateMicButton();
                 }
             };
-
-            return true;
         }
 
-        function toggleListening() {
-            if (!recognition) {
-                if (!initSpeechRecognition()) return;
-            }
-
+        function toggleVoice() {
+            if (!recognition) initSpeech();
             if (isListening) {
-                // ユーザーが手動で停止ボタンを押した
+                shouldListen = false;
                 recognition.stop();
+                isListening = false;
             } else {
+                shouldListen = true;
                 try {
                     recognition.start();
-                } catch(e) {
-                    // すでに開始している場合の例外などをキャッチ
-                    console.error(e);
+                    isListening = true;
+                } catch (e) {
+                    console.log("Start error:", e);
                 }
             }
+            updateMicButton();
         }
 
-        function stopListeningUI() {
-            isListening = false;
-            document.getElementById('micBtn').classList.remove('listening');
-            document.getElementById('statusText').innerText = "タップして録音開始";
-        }
-
-        // 音声テキストを解析してスコアを一括計算
-        function parseAndCalculate(text) {
-            let normalized = text
-                .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-                .toLowerCase();
-
-            // 1. タイムの抽出 (例: "5秒23", "5.23", "タイム 5.2")
-            let timeVal = 0.0;
-            const explicitTime = normalized.match(/([0-9]+(?:\.[0-9]+)?)\s*秒/);
-            if (explicitTime) {
-                timeVal = parseFloat(explicitTime[1]);
+        function updateMicButton() {
+            const btn = document.getElementById('micBtn');
+            const status = document.getElementById('voiceStatus');
+            if (isListening) {
+                btn.innerText = "⏹️ 音声認識: 稼働中 (自動継続)";
+                btn.style.backgroundColor = "#ff4444";
+                status.innerText = "聞き取り中... 話してください";
             } else {
-                const timeMatch = normalized.match(/(?:タイム|たいむ)?\s*([0-9]+)(?:[秒.]|\s+秒\s*)([0-9]+)?/);
-                if (timeMatch) {
-                    const sec = parseInt(timeMatch[1]);
-                    const subsec = timeMatch[2] ? parseFloat("0." + timeMatch[2]) : 0;
-                    timeVal = sec + subsec;
+                btn.innerText = "🎙️ 音声認識: 停止中";
+                btn.style.backgroundColor = "#ffcc00";
+                status.innerText = "マイクボタンを押して開始";
+            }
+        }
+
+        function parseVoiceCommand(text) {
+            if (text.includes('アルファ') || text.includes('A')) {
+                scores.A++;
+            } else if (text.includes('チャーリー') || text.includes('C')) {
+                scores.C++;
+            } else if (text.includes('デルタ') || text.includes('D')) {
+                scores.D++;
+            } else if (text.includes('ミス') || text.includes('MISS')) {
+                scores.Miss++;
+            } else if (text.includes('ノーシュート') || text.includes('NS')) {
+                scores.NS++;
+            } else if (text.includes('プロシージャー') || text.includes('手続き')) {
+                scores.Proc++;
+            }
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('countA').innerText = scores.A;
+            document.getElementById('countC').innerText = scores.C;
+            document.getElementById('countD').innerText = scores.D;
+            document.getElementById('countMiss').innerText = scores.Miss;
+            document.getElementById('countNS').innerText = scores.NS;
+            document.getElementById('countProc').innerText = scores.Proc;
+        }
+
+        function resetScores() {
+            scores = { A: 0, C: 0, D: 0, Miss: 0, NS: 0, Proc: 0 };
+            updateScoreDisplay();
+        }
+
+        function nextStep(step) {
+            if (step === 2) {
+                const t = parseFloat(document.getElementById('timeInput').value);
+                if (isNaN(t) || t <= 0) {
+                    alert("有効なタイムを入力してください。");
+                    return;
                 }
+                runTime = t;
+            }
+            if (step === 3) {
+                if (isListening) {
+                    shouldListen = false;
+                    recognition.stop();
+                    isListening = false;
+                    updateMicButton();
+                }
+                calculateResult();
             }
 
-            // 2. ヒット数とペナルティの抽出ロジック
-            let counts = { A: 0, C: 0, D: 0, Miss: 0, NS: 0, Proc: 0 };
+            document.getElementById('step1').style.display = (step === 1) ? 'block' : 'none';
+            document.getElementById('step2').style.display = (step === 2) ? 'block' : 'none';
+            document.getElementById('step3').style.display = (step === 3) ? 'block' : 'none';
+            currentStep = step;
+        }
 
-            const numMap = { 'ゼロ': 0, '霊': 0, 'れい': 0, 'ワン': 1, '一': 1, 'いち': 1, 'ツー': 2, '二': 2, 'に': 2, 'スリー': 3, '三': 3, 'さん': 3, 'フォー': 4, '四': 4, 'よん': 4, 'ファイブ': 5, '五': 5, 'ご': 5, 'シックス': 6, '六': 6, 'ろく': 6, 'セブン': 7, '七': 7, 'なな': 7, 'エイト': 8, '八': 8, 'はち': 8, 'ナイン': 9, '九': 9, 'きゅう': 9, 'テン': 10, '十': 10, 'じゅう': 10 };
+        function calculateResult() {
+            // マイナー計算: A=5, C=3, D=1, Miss=-10, NS=-10, Proc=-10
+            let totalPoints = (scores.A * 5) + (scores.C * 3) + (scores.D * 1) - (scores.Miss * 10) - (scores.NS * 10) - (scores.Proc * 10);
+            if (totalPoints < 0) totalPoints = 0;
             
-            function parseCount(keywordRegex) {
-                let total = 0;
-                const regex = new RegExp(`([0-9]+|\\b(?:ワン|ツー|スリー|フォー|ファイブ|シックス|セブン|エイト|ナイン|テン|一|二|三|四|五|六|七|八|九|十)\\b)?\\s*(?:つ|個)?\\s*${keywordRegex}|${keywordRegex}\\s*(?:が)?\\s*([0-9]+|\\b(?:ワン|ツー|スリー|フォー|ファイブ|シックス|セブン|エイト|ナイン|テン|一|二|三|四|五|六|七|八|九|十)\\b)`, 'g');
-                
-                let match;
-                while ((match = regex.exec(normalized)) !== null) {
-                    let valStr = match[1] || match[2] || "1";
-                    let num = parseInt(valStr);
-                    if (isNaN(num)) {
-                        num = numMap[valStr] || 1;
-                    }
-                    total += num;
-                }
-                return total;
-            }
+            let hf = runTime > 0 ? (totalPoints / runTime) : 0;
 
-            counts.A = parseCount('(?:a|アルファ|あるふぁ)');
-            counts.C = parseCount('(?:c|チャーリー|ちゃーりー)');
-            counts.D = parseCount('(?:d|デルタ|でるた)');
-            counts.Miss = parseCount('(?:미스|ミス|みす|miss)');
-            counts.NS = parseCount('(?:ノーシュート|のーしゅーと|no[\\s-]?shoot|ns)');
-            counts.Proc = parseCount('(?:プロシージャル|プロシージャー|ぷろしーじゃる|procedure|proc)');
-
-            // タイムが取れていない場合、最初の独立した数値をタイムとみなす
-            if (timeVal === 0) {
-                const allNums = normalized.match(/\b([0-9]+(?:\.[0-9]+)?)\b/g);
-                if (allNums && allNums.length > 0) {
-                    timeVal = parseFloat(allNums[0]);
-                }
-            }
-
-            // 計算 (Minor)
-            const rawPoints = (counts.A * 5) + (counts.C * 3) + (counts.D * 1);
-            const penaltyPoints = (counts.Miss + counts.NS + counts.Proc) * 10;
-            const netScore = Math.max(0, rawPoints - penaltyPoints);
-            const hitFactor = timeVal > 0 ? (netScore / timeVal).toFixed(4) : "0.0000";
-
-            // 画面に反映
-            document.getElementById('valTime').innerText = timeVal.toFixed(2) + " s";
-            document.getElementById('valPoints').innerText = rawPoints + " pts";
-            document.getElementById('valPenalties').innerText = "-" + penaltyPoints + " pts";
-            document.getElementById('valNetScore').innerText = netScore + " pts";
-            document.getElementById('valHitFactor').innerText = hitFactor;
-
-            document.getElementById('countA').innerText = counts.A;
-            document.getElementById('countC').innerText = counts.C;
-            document.getElementById('countD').innerText = counts.D;
-            document.getElementById('countMiss').innerText = counts.Miss;
-            document.getElementById('countNS').innerText = counts.NS;
-            document.getElementById('countProc').innerText = counts.Proc;
+            document.getElementById('resTime').innerText = runTime.toFixed(2);
+            document.getElementById('resPoints').innerText = totalPoints;
+            document.getElementById('resHF').innerText = hf.toFixed(4);
         }
 
         function resetAll() {
-            document.getElementById('transcriptBox').innerText = "（ここに認識された音声が表示されます）";
-            document.getElementById('valTime').innerText = "0.00 s";
-            document.getElementById('valPoints').innerText = "0 pts";
-            document.getElementById('valPenalties').innerText = "-0 pts";
-            document.getElementById('valNetScore').innerText = "0 pts";
-            document.getElementById('valHitFactor').innerText = "0.0000";
-            document.getElementById('countA').innerText = "0";
-            document.getElementById('countC').innerText = "0";
-            document.getElementById('countD').innerText = "0";
-            document.getElementById('countMiss').innerText = "0";
-            document.getElementById('countNS').innerText = "0";
-            document.getElementById('countProc').innerText = "0";
+            resetScores();
+            document.getElementById('timeInput').value = '';
+            nextStep(1);
         }
     </script>
 </body>
