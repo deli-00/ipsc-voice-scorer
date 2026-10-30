@@ -13,7 +13,7 @@
             padding: 15px;
             box-sizing: border-box;
         }
-        h1 { font-size: 1.5rem; text-align: center; color: #ffcc00; margin-bottom: 10px; }
+        h1 { font-size: 1.4rem; text-align: center; color: #ffcc00; margin-bottom: 10px; }
         .card {
             background: #1e1e1e;
             border: 1px solid #333;
@@ -35,87 +35,132 @@
         }
         button:active { background-color: #e6b800; }
         button.secondary { background-color: #333; color: #fff; }
-        input {
-            width: 100%;
-            padding: 10px;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            box-sizing: border-box;
-            margin-top: 5px;
+        .mic-btn-on {
+            background-color: #ff4444 !important;
+            color: #fff !important;
+            font-size: 1.2rem !important;
+            padding: 16px !important;
         }
-        .status {
-            font-size: 0.9rem;
-            color: #00ffcc;
-            margin-top: 8px;
+        .mic-btn-off {
+            background-color: #00ffcc !important;
+            color: #000 !important;
+            font-size: 1.2rem !important;
+            padding: 16px !important;
+        }
+        .small-btn {
+            padding: 4px 10px;
+            font-size: 1rem;
+            width: auto;
+            margin: 0 2px;
+            background-color: #444;
+            color: #fff;
+        }
+        .small-btn:active { background-color: #666; }
+        .status-box {
+            background: #252525;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
             text-align: center;
         }
+        .mode-label { font-size: 0.85rem; color: #ffcc00; }
+        .transcript-label { font-size: 1rem; color: #00ffcc; font-weight: bold; margin-top: 4px; }
         .flex { display: flex; gap: 10px; }
         .flex > * { flex: 1; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #444; padding: 8px; text-align: center; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: center; vertical-align: middle; }
         th { background: #2a2a2a; color: #ffcc00; }
     </style>
 </head>
 <body>
     <h1>IPSC Voice Scorer (Minor)</h1>
     
-    <!-- ステップ 1: タイム入力 -->
-    <div id="step1" class="card">
-        <h3>Step 1: タイム入力</h3>
-        <label>タイム (秒):</label>
-        <input type="number" id="timeInput" step="0.01" placeholder="例: 3.52">
-        <button onclick="nextStep(2)">次へ (ターゲット入力へ)</button>
-    </div>
-
-    <!-- ステップ 2: ターゲット入力 -->
-    <div id="step2" class="card" style="display:none;">
-        <h3>Step 2: ターゲット確認・音声入力</h3>
-        <p style="font-size:0.82rem; color:#aaa;">「アルファ」「チャーリー」「デルタ」「ミス」「ノーシュート」「プロシージャー」と発話してください。</p>
+    <!-- メイン操作パネル -->
+    <div class="card">
+        <!-- 発話ボタン -->
+        <button id="micBtn" class="mic-btn-off" onclick="toggleVoice()">🎤 発話ボタンをオンにする</button>
         
-        <!-- ★ここにあったマイクボタンを復元しました★ -->
-        <button id="micBtn" onclick="toggleVoice()">🎙️ 音声認識: 停止中</button>
-        <div id="voiceStatus" class="status">マイクボタンを押して開始</div>
+        <div class="status-box">
+            <div class="mode-label">現在のモード: <span id="currentMode" style="color:#fff;">待機中</span></div>
+            <div id="voiceStatus" class="transcript-label">ボタンを押して開始してください</div>
+        </div>
+
+        <!-- タイム・スコア確認エリア -->
+        <div style="margin-top: 15px; font-size: 1.1rem; display: flex; justify-content: space-between; background: #2a2a2a; padding: 10px; border-radius: 6px;">
+            <span>タイム: <strong id="displayTime" style="color:#ffcc00;">0.00</strong> 秒</span>
+            <button class="small-btn" onclick="editTimePrompt()" style="background:#555;">変更</button>
+        </div>
 
         <table>
-            <tr><th>判定</th><th>点数/ペナルティ</th><th>回数</th></tr>
-            <tr><td>A (Alpha)</td><td>5点</td><td id="countA">0</td></tr>
-            <tr><td>C (Charlie)</td><td>3点</td><td id="countC">0</td></tr>
-            <tr><td>D (Delta)</td><td>1点</td><td id="countD">0</td></tr>
-            <tr><td>Miss</td><td>-10点</td><td id="countMiss">0</td></tr>
-            <tr><td>No Shoot</td><td>-10点</td><td id="countNS">0</td></tr>
-            <tr><td>Proc.</td><td>-10点</td><td id="countProc">0</td></tr>
+            <tr><th>判定</th><th>点数</th><th>手動</th><th>回数</th></tr>
+            <tr>
+                <td>A (Alpha)</td><td>5</td>
+                <td><button class="small-btn" onclick="adjustScore('A', -1)">-</button><button class="small-btn" onclick="adjustScore('A', 1)">+</button></td>
+                <td id="countA" style="font-weight:bold;">0</td>
+            </tr>
+            <tr>
+                <td>C (Charlie)</td><td>3</td>
+                <td><button class="small-btn" onclick="adjustScore('C', -1)">-</button><button class="small-btn" onclick="adjustScore('C', 1)">+</button></td>
+                <td id="countC" style="font-weight:bold;">0</td>
+            </tr>
+            <tr>
+                <td>D (Delta)</td><td>1</td>
+                <td><button class="small-btn" onclick="adjustScore('D', -1)">-</button><button class="small-btn" onclick="adjustScore('D', 1)">+</button></td>
+                <td id="countD" style="font-weight:bold;">0</td>
+            </tr>
+            <tr>
+                <td>Miss</td><td>-10</td>
+                <td><button class="small-btn" onclick="adjustScore('Miss', -1)">-</button><button class="small-btn" onclick="adjustScore('Miss', 1)">+</button></td>
+                <td id="countMiss" style="font-weight:bold;">0</td>
+            </tr>
+            <tr>
+                <td>No Shoot</td><td>-10</td>
+                <td><button class="small-btn" onclick="adjustScore('NS', -1)">-</button><button class="small-btn" onclick="adjustScore('NS', 1)">+</button></td>
+                <td id="countNS" style="font-weight:bold;">0</td>
+            </tr>
+            <tr>
+                <td>Proc.</td><td>-10</td>
+                <td><button class="small-btn" onclick="adjustScore('Proc', -1)">-</button><button class="small-btn" onclick="adjustScore('Proc', 1)">+</button></td>
+                <td id="countProc" style="font-weight:bold;">0</td>
+            </tr>
         </table>
 
-        <div class="flex">
-            <button class="secondary" onclick="resetScores()">リセット</button>
-            <button class="secondary" onclick="nextStep(1)">戻る</button>
-        </div>
-        <button style="margin-top:10px;" onclick="nextStep(3)">結果（ヒットファクター）を見る</button>
+        <button style="margin-top: 15px; background-color: #00ffcc; color: #000;" onclick="showResult()">📊 ヒットファクターを算出する</button>
+        <button class="secondary" onclick="resetAll()">リセット</button>
     </div>
 
-    <!-- ステップ 3: 結果表示 -->
-    <div id="step3" class="card" style="display:none;">
-        <h3>Step 3: ヒットファクター算出</h3>
-        <div style="font-size: 1.1rem; margin-bottom: 10px; line-height: 1.6;">
+    <!-- 結果モーダル（結果表示用） -->
+    <div id="resultCard" class="card" style="display:none; border: 2px solid #00ffcc;">
+        <h3 style="color:#00ffcc; text-align:center;">結果発表</h3>
+        <div style="font-size: 1.1rem; line-height: 1.8; text-align: center;">
             <p>タイム: <span id="resTime">0.00</span> 秒</p>
             <p>合計ポイント: <span id="resPoints">0</span> 点</p>
-            <p style="font-size: 1.4rem; color: #00ffcc; font-weight: bold;">HF: <span id="resHF">0.0000</span></p>
+            <p style="font-size: 1.5rem; color: #ffcc00; font-weight: bold;">HF: <span id="resHF">0.0000</span></p>
         </div>
-        <button onclick="nextStep(2)">修正する</button>
-        <button class="secondary" onclick="resetAll()">最初からやり直す</button>
+        <button class="secondary" onclick="hideResult()">戻る</button>
     </div>
 
     <script>
-        let currentStep = 1;
         let scores = { A: 0, C: 0, D: 0, Miss: 0, NS: 0, Proc: 0 };
         let runTime = 0.0;
-
         let recognition = null;
         let isListening = false;
         let shouldListen = false;
+        let inputMode = 'idle'; // 'idle', 'time', 'score'
+
+        const numMap = {
+            'ワン': 1, '1': 1, 'いち': 1, '一': 1,
+            'ツー': 2, '2': 2, 'に': 2, '二': 2,
+            'スリー': 3, '3': 3, 'さん': 3, '三': 3,
+            'フォー': 4, '4': 4, 'よん': 4, '四': 4,
+            'ファイブ': 5, '5': 5, 'ご': 5, '五': 5,
+            'シックス': 6, '6': 6, 'ろく': 6,
+            'セブン': 7, '7': 7, 'なな': 7,
+            'エイト': 8, '8': 8, 'はち': 8,
+            'ナイン': 9, '9': 9, 'きゅう': 9,
+            'テン': 10, '10': 10, 'じゅう': 10
+        };
 
         function initSpeech() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -130,8 +175,8 @@
 
             recognition.onresult = (event) => {
                 const transcript = event.results[event.results.length - 1][0].transcript.trim();
-                document.getElementById('voiceStatus').innerText = `認識: 「${transcript}」`;
-                parseVoiceCommand(transcript);
+                document.getElementById('voiceStatus').innerText = `「${transcript}」`;
+                parseCommand(transcript);
             };
 
             recognition.onerror = (event) => {
@@ -140,14 +185,10 @@
 
             recognition.onend = () => {
                 if (shouldListen) {
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        console.log("Restart error:", e);
-                    }
+                    try { recognition.start(); } catch (e) { console.log(e); }
                 } else {
                     isListening = false;
-                    updateMicButton();
+                    updateButtonState();
                 }
             };
         }
@@ -163,41 +204,88 @@
                 try {
                     recognition.start();
                     isListening = true;
-                } catch (e) {
-                    console.log("Start error:", e);
-                }
+                } catch (e) { console.log(e); }
             }
-            updateMicButton();
+            updateButtonState();
         }
 
-        function updateMicButton() {
+        function updateButtonState() {
             const btn = document.getElementById('micBtn');
-            const status = document.getElementById('voiceStatus');
             if (isListening) {
-                btn.innerText = "⏹️ 音声認識: 稼働中 (自動継続)";
-                btn.style.backgroundColor = "#ff4444";
-                status.innerText = "聞き取り中... 話してください";
+                btn.className = "mic-btn-on";
+                btn.innerText = "⏹️ 発話ボタンをオフにする";
+                if (inputMode === 'idle') {
+                    document.getElementById('currentMode').innerText = "待機中（「タイム」または「スコア」と発話してください）";
+                }
             } else {
-                btn.innerText = "🎙️ 音声認識: 停止中";
-                btn.style.backgroundColor = "#ffcc00";
-                status.innerText = "マイクボタンを押して開始";
+                btn.className = "mic-btn-off";
+                btn.innerText = "🎤 発話ボタンをオンにする";
+                document.getElementById('currentMode').innerText = "停止中";
             }
         }
 
-        function parseVoiceCommand(text) {
-            if (text.includes('アルファ') || text.includes('A')) {
-                scores.A++;
-            } else if (text.includes('チャーリー') || text.includes('C')) {
-                scores.C++;
-            } else if (text.includes('デルタ') || text.includes('D')) {
-                scores.D++;
-            } else if (text.includes('ミス') || text.includes('MISS')) {
-                scores.Miss++;
-            } else if (text.includes('ノーシュート') || text.includes('NS')) {
-                scores.NS++;
-            } else if (text.includes('プロシージャー') || text.includes('手続き')) {
-                scores.Proc++;
+        function parseCommand(text) {
+            // モード切替のキーワード検知
+            if (text.includes('タイム')) {
+                inputMode = 'time';
+                document.getElementById('currentMode').innerText = "タイム入力中 (例: 「3.52」)";
+                extractTime(text);
+                return;
             }
+            if (text.includes('スコア') || text.includes('ターゲット') || text.includes('カウント')) {
+                inputMode = 'score';
+                document.getElementById('currentMode').innerText = "スコア入力中 (例: 「ツーアルファ、ワンチャーリー」)";
+                return;
+            }
+
+            // 現在のモードに応じた処理
+            if (inputMode === 'time') {
+                extractTime(text);
+            } else if (inputMode === 'score') {
+                extractScores(text);
+            }
+        }
+
+        function extractTime(text) {
+            let cleaned = text.replace(/点/g, '.');
+            let match = cleaned.match(/(\d+(\.\d+)?)/);
+            if (match) {
+                runTime = parseFloat(match[1]);
+                document.getElementById('displayTime').innerText = runTime.toFixed(2);
+            }
+        }
+
+        function extractScores(text) {
+            const pattern = /(ワン|ツー|スリー|フォー|ファイブ|シックス|セブン|エイト|ナイン|テン|\d+|いち|に|さん|よん|ご)?(アルファ|チャーリー|デルタ|ミス|ノーシュート|プロシージャー)/g;
+            let match;
+            let updated = false;
+
+            while ((match = pattern.exec(text)) !== null) {
+                let count = 1;
+                if (match[1]) {
+                    if (numMap[match[1]] !== undefined) {
+                        count = numMap[match[1]];
+                    } else {
+                        let parsed = parseInt(match[1], 10);
+                        if (!isNaN(parsed)) count = parsed;
+                    }
+                }
+                let targetName = match[2];
+                if (targetName === 'アルファ') scores.A += count;
+                else if (targetName === 'チャーリー') scores.C += count;
+                else if (targetName === 'デルタ') scores.D += count;
+                else if (targetName === 'ミス') scores.Miss += count;
+                else if (targetName === 'ノーシュート') scores.NS += count;
+                else if (targetName === 'プロシージャー') scores.Proc += count;
+                updated = true;
+            }
+
+            if (updated) updateScoreDisplay();
+        }
+
+        function adjustScore(category, delta) {
+            scores[category] += delta;
+            if (scores[category] < 0) scores[category] = 0;
             updateScoreDisplay();
         }
 
@@ -210,51 +298,42 @@
             document.getElementById('countProc').innerText = scores.Proc;
         }
 
-        function resetScores() {
-            scores = { A: 0, C: 0, D: 0, Miss: 0, NS: 0, Proc: 0 };
-            updateScoreDisplay();
+        function editTimePrompt() {
+            let t = prompt("タイムを手動入力（秒）:", runTime);
+            if (t !== null && !isNaN(t)) {
+                runTime = parseFloat(t);
+                document.getElementById('displayTime').innerText = runTime.toFixed(2);
+            }
         }
 
-        function nextStep(step) {
-            if (step === 2) {
-                const t = parseFloat(document.getElementById('timeInput').value);
-                if (isNaN(t) || t <= 0) {
-                    alert("有効なタイムを入力してください。");
-                    return;
-                }
-                runTime = t;
-            }
-            if (step === 3) {
-                if (isListening) {
-                    shouldListen = false;
-                    recognition.stop();
-                    isListening = false;
-                    updateMicButton();
-                }
-                calculateResult();
-            }
-
-            document.getElementById('step1').style.display = (step === 1) ? 'block' : 'none';
-            document.getElementById('step2').style.display = (step === 2) ? 'block' : 'none';
-            document.getElementById('step3').style.display = (step === 3) ? 'block' : 'none';
-            currentStep = step;
-        }
-
-        function calculateResult() {
+        function showResult() {
+            if (isListening) toggleVoice(); // 自動でマイクオフにする
+            
             let totalPoints = (scores.A * 5) + (scores.C * 3) + (scores.D * 1) - (scores.Miss * 10) - (scores.NS * 10) - (scores.Proc * 10);
             if (totalPoints < 0) totalPoints = 0;
-            
             let hf = runTime > 0 ? (totalPoints / runTime) : 0;
 
             document.getElementById('resTime').innerText = runTime.toFixed(2);
             document.getElementById('resPoints').innerText = totalPoints;
             document.getElementById('resHF').innerText = hf.toFixed(4);
+
+            document.getElementById('resultCard').style.display = 'block';
+        }
+
+        function hideResult() {
+            document.getElementById('resultCard').style.display = 'none';
         }
 
         function resetAll() {
-            resetScores();
-            document.getElementById('timeInput').value = '';
-            nextStep(1);
+            if (isListening) toggleVoice();
+            scores = { A: 0, C: 0, D: 0, Miss: 0, NS: 0, Proc: 0 };
+            runTime = 0.0;
+            inputMode = 'idle';
+            document.getElementById('displayTime').innerText = "0.00";
+            document.getElementById('currentMode').innerText = "待機中";
+            document.getElementById('voiceStatus').innerText = "リセットしました";
+            updateScoreDisplay();
+            hideResult();
         }
     </script>
 </body>
