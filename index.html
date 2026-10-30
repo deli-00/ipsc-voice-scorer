@@ -130,7 +130,7 @@
         <button class="secondary" onclick="resetAll()">リセット</button>
     </div>
 
-    <!-- 結果モーダル（結果表示用） -->
+    <!-- 結果表示パネル -->
     <div id="resultCard" class="card" style="display:none; border: 2px solid #00ffcc;">
         <h3 style="color:#00ffcc; text-align:center;">結果発表</h3>
         <div style="font-size: 1.1rem; line-height: 1.8; text-align: center;">
@@ -225,7 +225,6 @@
         }
 
         function parseCommand(text) {
-            // モード切替のキーワード検知
             if (text.includes('タイム')) {
                 inputMode = 'time';
                 document.getElementById('currentMode').innerText = "タイム入力中 (例: 「3.52」)";
@@ -234,11 +233,10 @@
             }
             if (text.includes('スコア') || text.includes('ターゲット') || text.includes('カウント')) {
                 inputMode = 'score';
-                document.getElementById('currentMode').innerText = "スコア入力中 (例: 「ツーアルファ、ワンチャーリー」)";
+                document.getElementById('currentMode').innerText = "スコア入力中 (例: 「ツーアルファ、アルファ2」)";
                 return;
             }
 
-            // 現在のモードに応じた処理
             if (inputMode === 'time') {
                 extractTime(text);
             } else if (inputMode === 'score') {
@@ -256,11 +254,15 @@
         }
 
         function extractScores(text) {
-            const pattern = /(ワン|ツー|スリー|フォー|ファイブ|シックス|セブン|エイト|ナイン|テン|\d+|いち|に|さん|よん|ご)?(アルファ|チャーリー|デルタ|ミス|ノーシュート|プロシージャー)/g;
+            // 「数値 + ターゲット名」または「ターゲット名 + 数値」の両方に対応する正規表現
+            const pattern1 = /(ワン|ツー|スリー|フォー|ファイブ|シックス|セブン|エイト|ナイン|テン|\d+|いち|に|さん|よん|ご)?\s*(アルファ|チャーリー|デルタ|ミス|ノーシュート|プロシージャー)/g;
+            const pattern2 = /(アルファ|チャーリー|デルタ|ミス|ノーシュート|プロシージャー)\s*(ワン|ツー|スリー|フォー|ファイブ|シックス|セブン|エイト|ナイン|テン|\d+|いち|に|さん|よん|ご)/g;
+            
             let match;
             let updated = false;
 
-            while ((match = pattern.exec(text)) !== null) {
+            // パターン1: [数詞] [ターゲット名] (例: ツーアルファ、2アルファ)
+            while ((match = pattern1.exec(text)) !== null) {
                 let count = 1;
                 if (match[1]) {
                     if (numMap[match[1]] !== undefined) {
@@ -271,16 +273,36 @@
                     }
                 }
                 let targetName = match[2];
-                if (targetName === 'アルファ') scores.A += count;
-                else if (targetName === 'チャーリー') scores.C += count;
-                else if (targetName === 'デルタ') scores.D += count;
-                else if (targetName === 'ミス') scores.Miss += count;
-                else if (targetName === 'ノーシュート') scores.NS += count;
-                else if (targetName === 'プロシージャー') scores.Proc += count;
+                addScoreCount(targetName, count);
+                updated = true;
+            }
+
+            // パターン2: [ターゲット名] [数詞] (例: アルファ2、アルファツー)
+            while ((match = pattern2.exec(text)) !== null) {
+                let targetName = match[1];
+                let count = 1;
+                if (match[2]) {
+                    if (numMap[match[2]] !== undefined) {
+                        count = numMap[match[2]];
+                    } else {
+                        let parsed = parseInt(match[2], 10);
+                        if (!isNaN(parsed)) count = parsed;
+                    }
+                }
+                addScoreCount(targetName, count);
                 updated = true;
             }
 
             if (updated) updateScoreDisplay();
+        }
+
+        function addScoreCount(targetName, count) {
+            if (targetName === 'アルファ') scores.A += count;
+            else if (targetName === 'チャーリー') scores.C += count;
+            else if (targetName === 'デルタ') scores.D += count;
+            else if (targetName === 'ミス') scores.Miss += count;
+            else if (targetName === 'ノーシュート') scores.NS += count;
+            else if (targetName === 'プロシージャー') scores.Proc += count;
         }
 
         function adjustScore(category, delta) {
@@ -307,7 +329,7 @@
         }
 
         function showResult() {
-            if (isListening) toggleVoice(); // 自動でマイクオフにする
+            if (isListening) toggleVoice();
             
             let totalPoints = (scores.A * 5) + (scores.C * 3) + (scores.D * 1) - (scores.Miss * 10) - (scores.NS * 10) - (scores.Proc * 10);
             if (totalPoints < 0) totalPoints = 0;
