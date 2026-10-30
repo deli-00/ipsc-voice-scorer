@@ -75,10 +75,8 @@
         <h3>Step 2: ターゲット確認・音声入力</h3>
         <p style="font-size:0.82rem; color:#aaa;">「アルファ」「チャーリー」「デルタ」「ミス」「ノーシュート」「プロシージャー」と発話してください。</p>
         
-        <div class="flex">
-            <button id="micBtn" onclick="toggleVoice()">🎙️ 音声認識: 停止中</button>
-            <button class="secondary" onclick="resetScores()">リセット</button>
-        </div>
+        <!-- ★ここにあったマイクボタンを復元しました★ -->
+        <button id="micBtn" onclick="toggleVoice()">🎙️ 音声認識: 停止中</button>
         <div id="voiceStatus" class="status">マイクボタンを押して開始</div>
 
         <table>
@@ -91,8 +89,11 @@
             <tr><td>Proc.</td><td>-10点</td><td id="countProc">0</td></tr>
         </table>
 
-        <button style="margin-top:15px;" onclick="nextStep(3)">結果（ヒットファクター）を見る</button>
-        <button class="secondary" onclick="nextStep(1)">戻る</button>
+        <div class="flex">
+            <button class="secondary" onclick="resetScores()">リセット</button>
+            <button class="secondary" onclick="nextStep(1)">戻る</button>
+        </div>
+        <button style="margin-top:10px;" onclick="nextStep(3)">結果（ヒットファクター）を見る</button>
     </div>
 
     <!-- ステップ 3: 結果表示 -->
@@ -114,7 +115,7 @@
 
         let recognition = null;
         let isListening = false;
-        let shouldListen = false; // 自動再スタート制御フラグ
+        let shouldListen = false;
 
         function initSpeech() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -138,7 +139,6 @@
             };
 
             recognition.onend = () => {
-                // ユーザーが明動的に停止していない場合、自動的に音声認識を再起動する
                 if (shouldListen) {
                     try {
                         recognition.start();
@@ -241,7 +241,6 @@
         }
 
         function calculateResult() {
-            // マイナー計算: A=5, C=3, D=1, Miss=-10, NS=-10, Proc=-10
             let totalPoints = (scores.A * 5) + (scores.C * 3) + (scores.D * 1) - (scores.Miss * 10) - (scores.NS * 10) - (scores.Proc * 10);
             if (totalPoints < 0) totalPoints = 0;
             
